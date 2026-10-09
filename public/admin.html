@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>نتائج الطلاب – خالد رخا</title>
+<link rel="icon" href="/assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#3b3289;--brand2:#5b4fc4;--ink:#1f2a44;--muted:#6b7694;--line:#e8ecf7;--soft:#f5f4fd;--ok:#0b8f66;--okbg:#e3f9f1;--mid:#c26a00;--midbg:#fff1dc;--bad:#d6264a;--badbg:#ffe8ec}
+*{box-sizing:border-box}
+html,body{margin:0;background:#f6f5fc;color:var(--ink);font-family:"Almarai","Segoe UI",Tahoma,Arial,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px 16px 40px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+header img{height:64px}
+header h1{margin:0;font-size:22px;color:var(--brand)}
+header .sp{flex:1}
+.btn{border:0;border-radius:12px;padding:10px 16px;font:inherit;font-weight:800;cursor:pointer;color:#fff;background:var(--brand)}
+.btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--line)}
+.gate{max-width:380px;margin:12vh auto;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:24px;text-align:center}
+.gate input{width:100%;padding:12px;border:2px solid var(--line);border-radius:12px;font:inherit;font-size:18px;text-align:center;direction:ltr;margin:12px 0}
+.err{color:var(--bad);font-weight:700;min-height:20px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px}
+.kpi small{color:var(--muted);font-size:13px}.kpi b{display:block;font-size:26px;margin-top:4px;color:var(--brand);font-variant-numeric:tabular-nums}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.tools input{flex:1;min-width:180px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;font:inherit}
+.tools label{font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.tbl{background:#fff;border:1.5px solid var(--line);border-radius:16px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--soft);color:var(--muted);font-weight:700;font-size:13px;position:sticky;top:0}
+tr.row{cursor:pointer}tr.row:hover td{background:#faf9ff}
+tr.unused td{color:#a7adc2}
+.code{font-weight:800;direction:ltr;unicode-bidi:embed;letter-spacing:1px}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-weight:800;font-size:13px}
+.p-ok{background:var(--okbg);color:var(--ok)}.p-mid{background:var(--midbg);color:var(--mid)}.p-bad{background:var(--badbg);color:var(--bad)}
+.det td{background:#fbfbfe;padding:0}
+.det table{font-size:13px}.det th{background:#f0eff9}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.hidden{display:none!important}
+</style></head><body>
+<div class="gate" id="gate">
+ <img src="/assets/logo.png" alt="" style="height:110px">
+ <h2 style="margin:8px 0 0;color:var(--brand)">صفحة النتائج</h2>
+ <form id="gf"><input id="key" type="password" placeholder="كلمة مرور الإدارة" autocomplete="current-password"><button class="btn" style="width:100%">عرض النتائج</button></form>
+ <div class="err" id="ge"></div>
+</div>
+<div class="wrap hidden" id="app">
+ <header><img src="/assets/logo.png" alt=""><div><h1>نتائج الطلاب</h1><small style="color:var(--muted)" id="upd"></small></div><span class="sp"></span>
+  <button class="btn ghost" id="rf">تحديث ↻</button><button class="btn" id="csv">تصدير Excel (CSV)</button><button class="btn ghost" id="lo">خروج</button></header>
+ <div class="kpis" id="kpis"></div>
+ <div class="tools"><input id="q" placeholder="ابحث برمز الدخول أو اسم الطالب"><label><input type="checkbox" id="used" checked> الرموز المستخدمة فقط</label></div>
+ <div class="tbl"><table><thead><tr><th>رمز الدخول</th><th>اسم الطالب</th><th>اختبارات مختلفة</th><th>محاولات</th><th>متوسط النسبة</th><th>أفضل نسبة</th><th>آخر نشاط</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);let KEY='',DATA=null,open=new Set();
+try{KEY=sessionStorage.getItem('rk_admin')||''}catch(e){}
+const fmt=s=>new Date(s).toLocaleString('ar-SA-u-ca-gregory-nu-latn',{dateStyle:'medium',timeStyle:'short'});
+const pill=p=>`<span class="pill ${p>=75?'p-ok':p>=50?'p-mid':'p-bad'}">${p}%</span>`;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function load(){
+ $('ge').textContent='';$('rf').textContent='جارٍ التحميل…';
+ try{const r=await fetch('/api/admin',{headers:{'x-admin-key':KEY},cache:'no-store'});const d=await r.json();
+  if(!d.ok){$('ge').textContent=d.error||'غير مصرح';$('gate').classList.remove('hidden');$('app').classList.add('hidden');return}
+  try{sessionStorage.setItem('rk_admin',KEY)}catch(e){}
+  DATA=d;$('gate').classList.add('hidden');$('app').classList.remove('hidden');$('upd').textContent='آخر تحديث: '+fmt(new Date());render()}
+ catch(e){$('ge').textContent='تعذّر الاتصال'} finally{$('rf').textContent='تحديث ↻'}}
+function group(){const m=new Map(DATA.codes.map(c=>[c,[]]));DATA.results.forEach(r=>{if(!m.has(r.code))m.set(r.code,[]);m.get(r.code).push(r)});return m}
+function render(){
+ const m=group(),q=$('q').value.trim(),onlyUsed=$('used').checked;
+ const all=DATA.results,usedCodes=[...m.values()].filter(a=>a.length).length;
+ const avg=all.length?Math.round(all.reduce((s,r)=>s+r.pct,0)/all.length):0;
+ $('kpis').innerHTML=`<div class="kpi"><small>رموز مستخدمة</small><b>${usedCodes} / ${DATA.codes.length}</b></div><div class="kpi"><small>إجمالي المحاولات</small><b>${all.length}</b></div><div class="kpi"><small>متوسط النسب</small><b>${avg}%</b></div><div class="kpi"><small>آخر محاولة</small><b style="font-size:16px">${all[0]?fmt(all[0].at):'—'}</b></div>`;
+ let rows=[...m.entries()].map(([code,a])=>({code,a,name:(a.find(x=>x.name)||{}).name||'',last:a[0]?.at||''}));
+ if(onlyUsed)rows=rows.filter(r=>r.a.length);
+ if(q)rows=rows.filter(r=>r.code.includes(q)||r.name.includes(q));
+ rows.sort((x,y)=>(y.last>x.last?1:y.last<x.last?-1:x.code.localeCompare(y.code)));
+ if(!rows.length){$('tb').innerHTML=`<tr><td colspan="7" class="empty">${DATA.results.length?'لا توجد نتائج مطابقة':'لم يُسجَّل أي اختبار بعد. ستظهر النتائج هنا فور إنهاء أي طالب لاختبار.'}</td></tr>`;return}
+ $('tb').innerHTML=rows.map(r=>{const a=r.a,n=a.length,ex=new Set(a.map(x=>x.exam)).size,av=n?Math.round(a.reduce((s,x)=>s+x.pct,0)/n):0,best=n?Math.max(...a.map(x=>x.pct)):0;
+  let h=`<tr class="row ${n?'':'unused'}" data-c="${r.code}"><td class="code">${r.code}</td><td>${esc(r.name)||'—'}</td><td>${ex} / 30</td><td>${n}</td><td>${n?pill(av):'—'}</td><td>${n?pill(best):'—'}</td><td>${n?fmt(r.last):'لم يُستخدم'}</td></tr>`;
+  if(open.has(r.code)&&n)h+=`<tr class="det"><td colspan="7"><table><thead><tr><th>الاختبار</th><th>التاريخ</th><th>الدرجة</th><th>النسبة</th><th>صحيحة</th><th>خاطئة</th><th>بلا إجابة</th><th>المدة</th><th>الاسم المكتوب</th></tr></thead><tbody>${a.map(x=>`<tr><td>الاختبار ${x.exam}</td><td>${fmt(x.at)}</td><td>${x.correct}/${x.total}</td><td>${pill(x.pct)}</td><td>${x.correct}</td><td>${x.wrong}</td><td>${x.skipped}</td><td>${x.minutes} د</td><td>${esc(x.name)||'—'}</td></tr>`).join('')}</tbody></table></td></tr>`;
+  return h}).join('')}
+$('tb').addEventListener('click',e=>{const tr=e.target.closest('tr.row');if(!tr)return;const c=tr.dataset.c;open.has(c)?open.delete(c):open.add(c);render()});
+$('q').addEventListener('input',render);$('used').addEventListener('change',render);$('rf').onclick=load;
+$('lo').onclick=()=>{try{sessionStorage.removeItem('rk_admin')}catch(e){}location.reload()};
+$('gf').onsubmit=e=>{e.preventDefault();KEY=$('key').value.trim();load()};
+$('csv').onclick=()=>{const head=['رمز الدخول','اسم الطالب','الاختبار','التاريخ','الدرجة','من','النسبة %','صحيحة','خاطئة','بلا إجابة','المدة بالدقائق'];
+ const lines=[head,...DATA.results.map(x=>[x.code,x.name,x.exam,fmt(x.at),x.correct,x.total,x.pct,x.correct,x.wrong,x.skipped,x.minutes])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','));
+ const b=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='نتائج-الطلاب.csv';a.click()};
+if(KEY)load();
+</script>
+</body></html>
