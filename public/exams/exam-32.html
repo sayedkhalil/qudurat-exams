@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اختبار القدرات (كمي) – الاختبار 32</title>
+<link rel="icon" href="/assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1f2a44;--muted:#6b7694;--line:#e8ecf7;--c1:#6c5ce7;--c2:#00b8d9;--ok:#12b886;--bad:#f03e5e;--warn:#ff9f1c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#fff;color:var(--ink);font-family:"Almarai","Segoe UI",Tahoma,Arial,sans-serif}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.wrap{width:100%;max-width:860px;padding:14px 14px 90px}
+.logos{position:relative;display:flex;justify-content:center;padding:6px 0 12px}
+.logos img{height:clamp(110px,22vw,150px);width:auto;display:block}
+.logos .home{position:absolute;top:8px;left:0;font-size:13px;font-weight:700;color:#3b3289;text-decoration:none;background:#efedfb;padding:7px 12px;border-radius:12px}
+button,input{font-family:inherit}
+.card{background:#fff;border:1.5px solid var(--line);border-radius:22px;box-shadow:0 8px 28px rgba(108,92,231,.10)}
+.hero{overflow:hidden;text-align:center}
+.hero .band{background:linear-gradient(120deg,#6c5ce7,#00b8d9 60%,#12b886);color:#fff;padding:26px 16px}
+.hero h1{margin:0 0 6px;font-size:clamp(22px,5vw,32px)}
+.hero p{margin:0;opacity:.95;font-size:clamp(14px,3.4vw,18px)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:20px 14px 6px}
+.chip{padding:10px 16px;border-radius:14px;font-weight:700;font-size:15px}
+.chip:nth-child(1){background:#efeaff;color:#5b49d6}.chip:nth-child(2){background:#e0f8fd;color:#0a8aa6}
+.chip:nth-child(3){background:#e3f9f1;color:#0b8f66}.chip:nth-child(4){background:#fff1dc;color:#c26a00}
+.start{padding:10px 20px 26px;text-align:center}
+.start input{width:min(380px,100%);padding:13px 16px;border:2px solid var(--line);border-radius:14px;font:inherit;font-size:16px;text-align:center;outline:none}
+.start input:focus{border-color:var(--c1)}
+.btn{border:0;cursor:pointer;font:inherit;font-weight:800;border-radius:16px;padding:14px 34px;font-size:18px;color:#fff;background:linear-gradient(120deg,#6c5ce7,#00b8d9);box-shadow:0 8px 20px rgba(108,92,231,.3);transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn.alt{background:linear-gradient(120deg,#ff9f1c,#f03e5e)}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.credit{margin-top:18px;text-align:center;color:var(--muted);font-size:15px;line-height:1.9}
+.credit b{color:var(--c1)}
+.credit a{color:#0b8f66;font-weight:800;text-decoration:none;direction:ltr;unicode-bidi:embed}
+.hidden{display:none!important}
+.top{display:flex;align-items:center;gap:12px;margin:6px 0 12px}
+.qno{flex:1}
+.qno .big{font-weight:800;font-size:20px;color:var(--c1)}
+.qno .small{font-size:13px;color:var(--muted)}
+.ring{position:relative;width:70px;height:70px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px}
+.bar{height:10px;border-radius:99px;background:#eef0fa;overflow:hidden;margin-bottom:14px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#6c5ce7,#00b8d9,#12b886);transition:width .4s}
+.qcard{padding:14px;text-align:center;border-top:6px solid var(--c1)}
+.qcard img{max-width:100%;max-height:56vh;height:auto;display:inline-block}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.opt{border:2.5px solid;border-radius:18px;padding:16px 8px;font:inherit;font-weight:800;font-size:22px;cursor:pointer;background:#fff;display:flex;align-items:center;justify-content:center;gap:12px;transition:.12s}
+.opt span.l{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
+.opt:active{transform:scale(.97)}
+.o0{border-color:#ff8787;color:#e03131}.o0 .l{background:#ff6b6b}.o0.sel{background:#ff6b6b;color:#fff}
+.o1{border-color:#74c0fc;color:#1c7ed6}.o1 .l{background:#339af0}.o1.sel{background:#339af0;color:#fff}
+.o2{border-color:#69db7c;color:#2b9a44}.o2 .l{background:#37b24d}.o2.sel{background:#37b24d;color:#fff}
+.o3{border-color:#ffc078;color:#d9730d}.o3 .l{background:#ff922b}.o3.sel{background:#ff922b;color:#fff}
+.opt.sel .l{background:#fff}.o0.sel .l{color:#e03131}.o1.sel .l{color:#1c7ed6}.o2.sel .l{color:#2b9a44}.o3.sel .l{color:#d9730d}
+.nav{display:flex;justify-content:center}
+.foot{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid var(--line);text-align:center;padding:8px 10px;font-size:13px;color:var(--muted)}
+.foot b{color:var(--c1)}
+.res{text-align:center;padding:24px 14px}
+.score{width:160px;height:160px;border-radius:50%;margin:8px auto 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:800;background:conic-gradient(var(--ok) var(--p),#ffe3e8 0)}
+.score div{width:128px;height:128px;border-radius:50%;background:#fff;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score b{font-size:34px}.score small{font-size:13px;color:var(--muted)}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.stat{padding:10px 18px;border-radius:14px;font-weight:800}
+.s1{background:#e3f9f1;color:#0b8f66}.s2{background:#ffe8ec;color:#d6264a}.s3{background:#fff1dc;color:#c26a00}
+.rev{margin-top:18px;text-align:right}
+.ri{padding:12px;margin-bottom:12px;border-right:7px solid;border-radius:16px}
+.ri.ok{border-color:var(--ok);background:#f4fdf9}.ri.no{border-color:var(--bad);background:#fff6f8}.ri.sk{border-color:var(--warn);background:#fffaf0}
+.ri .h{font-weight:800;margin-bottom:6px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.ri img{max-width:100%;height:auto;display:block;margin:0 auto}
+.ri .a{margin-top:6px;font-weight:700;font-size:15px;text-align:center}
+@media(max-width:480px){.opt{font-size:19px;padding:13px 4px}.opt span.l{width:36px;height:36px;font-size:19px}}
+@media print{.foot,.btn,.logos .home{display:none}}
+.save{margin:10px auto 0;display:inline-block;padding:8px 14px;border-radius:12px;font-weight:700;font-size:14px;background:#eef0fa;color:#6b7694}.save.ok{background:#e3f9f1;color:#0b8f66}.save.no{background:#ffe8ec;color:#d6264a}
+.qcard img{min-height:200px;background:#fafbff;border-radius:12px}
+.res .note{color:var(--muted);font-size:14px;margin-top:6px}
+.err{background:#ffe8ec;color:#d6264a;border-radius:14px;padding:14px;font-weight:700;margin:12px 0}
+.tlow #tm{animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.4}}
+@media (prefers-reduced-motion:reduce){.tlow #tm{animation:none}}
+</style></head><body>
+<div class="wrap">
+ <div class="logos"><a href="/" class="home">⬅ جميع الاختبارات</a><img src="/assets/logo.png" alt="خالد رخا للقدرات الكمي"></div>
+
+ <section id="home" class="card hero">
+  <div class="band"><h1>اختبار القدرات العامة – القسم الكمي</h1><p>الاختبار رقم 32 &nbsp;|&nbsp; 48 سؤالًا</p></div>
+  <div class="chips"><div class="chip">📝 48 سؤالًا</div><div class="chip">⏱️ دقيقة لكل سؤال</div><div class="chip">➡️ بدون رجوع للسؤال السابق</div><div class="chip">🏆 نتيجة فورية ومراجعة</div></div>
+  <div class="start"><p style="color:var(--muted);margin:8px 0 14px;line-height:1.9">لكل سؤال 60 ثانية تبدأ من لحظة ظهوره.<br>إذا انتهى الوقت دون إجابة ينتقل الاختبار للسؤال التالي <b style="color:#d6264a">وتُحسب الإجابة خاطئة</b>.</p>
+   <input id="nm" placeholder="اكتب اسمك" maxlength="40"><br><br>
+   <button class="btn" onclick="startExam()">ابدأ الاختبار 🚀</button></div>
+ </section>
+
+ <section id="quiz" class="hidden">
+  <div class="top"><div class="qno"><div class="big" id="qn"></div><div class="small" id="qs"></div></div>
+   <div class="ring"><svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="30" fill="none" stroke="#eef0fa" stroke-width="7"/><circle id="rg" cx="35" cy="35" r="30" fill="none" stroke="#12b886" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="0"/></svg><div class="t" id="tm">60</div></div></div>
+  <div class="bar"><i id="pb"></i></div>
+  <div class="card qcard"><img id="qi" alt="السؤال" width="900" height="600"></div>
+  <div class="opts" id="opts"></div>
+  <div class="nav"><button class="btn" id="nx" onclick="next()">التالي ⬅️</button></div>
+ </section>
+
+ <section id="result" class="card res hidden"></section>
+
+ <div class="credit">إعداد <b>أ / خالد رخا</b><br>للتواصل واتساب <a href="https://wa.me/966533434872" target="_blank">0533434872</a></div>
+</div>
+<div class="foot">إعداد <b>أ / خالد رخا</b> &nbsp;•&nbsp; للتواصل واتساب <a href="https://wa.me/966533434872" target="_blank" dir="ltr" style="color:inherit;text-decoration:none">0533434872</a></div>
+
+<script>
+const EXAM=32,COUNT=48,T=60,L=['أ','ب','ج','د'];
+const img=k=>'/q/v'+String(EXAM).padStart(2,'0')+'/'+String(k+1).padStart(2,'0')+'.webp';
+let i=0,sel=[],t0=0,iv=null,name='',tStart=0,done=false;
+const $=id=>document.getElementById(id);
+function preload(k){if(k<COUNT){const im=new Image();im.src=img(k)}}
+function startExam(){name=$('nm').value.trim();$('home').classList.add('hidden');$('quiz').classList.remove('hidden');sel=Array(COUNT).fill(-1);tStart=Date.now();show(0)}
+function show(k){
+ i=k;$('qn').textContent='السؤال '+(k+1);$('qs').textContent='('+(k+1)+' من '+COUNT+')';
+ $('qi').src=img(k);preload(k+1);$('pb').style.width=(k/COUNT*100)+'%';
+ $('nx').textContent=k==COUNT-1?'إنهاء الاختبار ✅':'التالي ⬅️';
+ $('opts').innerHTML=L.map((l,j)=>`<button class="opt o${j}" onclick="pick(${j})"><span class="l">${l}</span><span>${l}</span></button>`).join('');
+ t0=Date.now();clearInterval(iv);tick();iv=setInterval(tick,200);window.scrollTo(0,0)}
+function pick(j){sel[i]=j;[...document.querySelectorAll('.opt')].forEach((b,k)=>b.classList.toggle('sel',k==j))}
+function tick(){const r=Math.max(0,T-(Date.now()-t0)/1000);$('tm').textContent=Math.ceil(r);
+ const rg=$('rg');rg.style.strokeDashoffset=188.5*(1-r/T);const c=r>30?'#12b886':r>10?'#ff9f1c':'#f03e5e';rg.style.stroke=c;$('tm').style.color=c;
+ document.querySelector('.ring').classList.toggle('tlow',r<=10);
+ if(r<=0){next()}}
+function next(){clearInterval(iv);if(i<COUNT-1)show(i+1);else finish()}
+async function finish(){
+ if(done)return;done=true;
+ $('quiz').classList.add('hidden');const R=$('result');R.classList.remove('hidden');
+ R.innerHTML='<h2>⏳ جارٍ تصحيح الاختبار وحفظ النتيجة…</h2>';window.scrollTo(0,0);
+ const mins=Math.max(1,Math.round((Date.now()-tStart)/60000));
+ let d=null;
+ for(let a=0;a<3&&!d;a++){try{const r=await fetch('/api/result',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({exam:EXAM,answers:sel,minutes:mins,name})});
+  const j=await r.json();if(j.ok)d=j;else{R.innerHTML='<div class="err">✘ '+(j.error||'تعذّر التصحيح')+'</div><a class="btn" href="/login">تسجيل الدخول</a>';return}}catch(e){await new Promise(z=>setTimeout(z,1500))}}
+ if(!d){done=false;R.innerHTML='<div class="err">✘ تعذّر الاتصال لتصحيح الاختبار. تحقق من الإنترنت ثم اضغط إعادة المحاولة (إجاباتك محفوظة في الصفحة).</div><button class="btn" onclick="finish()">إعادة المحاولة 🔁</button>';return}
+ render(d)}
+function render(d){
+ const R=$('result'),key=d.key,pct=d.pct;
+ const msg=pct>=90?'🌟 أداء رائع! استمر':pct>=75?'👏 ممتاز، قريب من القمة':pct>=60?'👍 جيد، راجع أخطاءك':'💪 لا بأس، راجع الأسئلة وأعد المحاولة';
+ R.innerHTML=`<h2 style="margin:0 0 4px">${name?('نتيجة '+name.replace(/[<>&"]/g,'')):'نتيجتك'}</h2><div style="color:var(--muted)">الاختبار رقم ${EXAM} – ${COUNT} سؤالًا</div>
+ <div class="save ${d.saved?'ok':'no'}">${d.saved?'✔ تم حفظ نتيجتك على رمز الدخول '+d.code:'✘ تم التصحيح لكن تعذّر حفظ النتيجة'}</div>
+ <div class="score" style="--p:${pct}%"><div><b>${d.correct}/${COUNT}</b><small>${pct}%</small></div></div>
+ <div style="font-weight:800;font-size:19px">${msg}</div>
+ <div class="stats"><div class="stat s1">✔ صحيحة: ${d.correct}</div><div class="stat s2">✘ خاطئة: ${d.wrong}</div></div>
+ ${d.skipped?`<div class="note">منها ${d.skipped} سؤالًا انتهى وقته دون إجابة (تُحسب خاطئة)</div>`:''}
+ <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><button class="btn" onclick="location.reload()">إعادة الاختبار 🔄</button><a class="btn alt" href="/" style="text-decoration:none">جميع الاختبارات</a></div>
+ <div class="rev"><h3>مراجعة الإجابات</h3>${key.map((a,k)=>{const s=sel[k],c=s<0?'sk':s==a?'ok':'no';
+ return `<div class="ri ${c}"><div class="h"><span>سؤال ${k+1}</span><span>${c=='ok'?'✔ إجابة صحيحة':c=='no'?'✘ إجابة خاطئة':'⏱ انتهى الوقت – تُحسب خاطئة'}</span></div><img src="${img(k)}" loading="lazy" width="900" height="600"><div class="a">إجابتك: ${s<0?'—':L[s]} &nbsp;|&nbsp; الإجابة الصحيحة: <span style="color:var(--ok)">${L[a]}</span></div></div>`}).join('')}</div>`;
+ window.scrollTo(0,0)}
+window.addEventListener('beforeunload',e=>{if(!$('quiz').classList.contains('hidden')){e.preventDefault();e.returnValue=''}});
+</script></body></html>
