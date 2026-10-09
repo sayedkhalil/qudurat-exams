@@ -12,16 +12,27 @@ export async function POST(request) {
   const exam = num(b.exam, 999);
   const key = KEY[exam];
   if (!key) return json({ ok: false, error: 'رقم الاختبار غير صحيح' }, 400);
-  const answers = key.map((_, i) => {
+
+  // Optional subset of question indices (retry of wrong answers only).
+  let questions = key.map((_, i) => i);
+  let retry = false;
+  if (Array.isArray(b.questions) && b.questions.length) {
+    const qs = [...new Set(b.questions.map(Number).filter(i => Number.isInteger(i) && i >= 0 && i < key.length))].sort((x, y) => x - y);
+    if (qs.length) { questions = qs; retry = true; }
+  }
+  const pickAnswer = (i) => {
     const x = Array.isArray(b.answers) ? b.answers[i] : -1;
     return Number.isInteger(x) && x >= 0 && x <= 3 ? x : -1;
-  });
-  const correct = answers.filter((x, i) => x === key[i]).length;
-  const skipped = answers.filter(x => x < 0).length;
-  const total = key.length;
+  };
+  const answers = key.map((_, i) => (questions.includes(i) ? pickAnswer(i) : -1));
+  const correct = questions.filter(i => answers[i] === key[i]).length;
+  const skipped = questions.filter(i => answers[i] < 0).length;
+  const total = questions.length;
   const record = {
     code,
     exam,
+    retry,
+    questions: retry ? questions : undefined,
     total,
     correct,
     wrong: total - correct, // unanswered questions count as wrong
@@ -32,7 +43,7 @@ export async function POST(request) {
     answers,
     at: new Date().toISOString(),
   };
-  const path = `results/${code}/exam-${String(exam).padStart(2, '0')}-${Date.now()}.json`;
+  const path = `results/${code}/exam-${String(exam).padStart(2, '0')}${retry ? '-retry' : ''}-${Date.now()}.json`;
   let saved = true;
   try {
     await put(path, JSON.stringify(record), { access: 'private', contentType: 'application/json', addRandomSuffix: false });

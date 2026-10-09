@@ -69,23 +69,23 @@ function group(){const m=new Map(DATA.codes.map(c=>[c,[]]));DATA.results.forEach
 function render(){
  const m=group(),q=$('q').value.trim(),onlyUsed=$('used').checked;
  const all=DATA.results,usedCodes=[...m.values()].filter(a=>a.length).length;
- const avg=all.length?Math.round(all.reduce((s,r)=>s+r.pct,0)/all.length):0;
- $('kpis').innerHTML=`<div class="kpi"><small>رموز مستخدمة</small><b>${usedCodes} / ${DATA.codes.length}</b></div><div class="kpi"><small>إجمالي المحاولات</small><b>${all.length}</b></div><div class="kpi"><small>متوسط النسب</small><b>${avg}%</b></div><div class="kpi"><small>آخر محاولة</small><b style="font-size:16px">${all[0]?fmt(all[0].at):'—'}</b></div>`;
+ const mainAll=all.filter(r=>!r.retry);const avg=mainAll.length?Math.round(mainAll.reduce((s,r)=>s+r.pct,0)/mainAll.length):0;
+ $('kpis').innerHTML=`<div class="kpi"><small>رموز مستخدمة</small><b>${usedCodes} / ${DATA.codes.length}</b></div><div class="kpi"><small>إجمالي المحاولات</small><b>${all.length}</b></div><div class="kpi"><small>متوسط النسب (بدون الإعادات)</small><b>${avg}%</b></div><div class="kpi"><small>آخر محاولة</small><b style="font-size:16px">${all[0]?fmt(all[0].at):'—'}</b></div>`;
  let rows=[...m.entries()].map(([code,a])=>({code,a,name:(a.find(x=>x.name)||{}).name||'',last:a[0]?.at||''}));
  if(onlyUsed)rows=rows.filter(r=>r.a.length);
  if(q)rows=rows.filter(r=>r.code.includes(q)||r.name.includes(q));
  rows.sort((x,y)=>(y.last>x.last?1:y.last<x.last?-1:x.code.localeCompare(y.code)));
  if(!rows.length){$('tb').innerHTML=`<tr><td colspan="7" class="empty">${DATA.results.length?'لا توجد نتائج مطابقة':'لم يُسجَّل أي اختبار بعد. ستظهر النتائج هنا فور إنهاء أي طالب لاختبار.'}</td></tr>`;return}
- $('tb').innerHTML=rows.map(r=>{const a=r.a,n=a.length,ex=new Set(a.map(x=>x.exam)).size,av=n?Math.round(a.reduce((s,x)=>s+x.pct,0)/n):0,best=n?Math.max(...a.map(x=>x.pct)):0;
-  let h=`<tr class="row ${n?'':'unused'}" data-c="${r.code}"><td class="code">${r.code}</td><td>${esc(r.name)||'—'}</td><td>${ex} / 50</td><td>${n}</td><td>${n?pill(av):'—'}</td><td>${n?pill(best):'—'}</td><td>${n?fmt(r.last):'لم يُستخدم'}</td></tr>`;
-  if(open.has(r.code)&&n)h+=`<tr class="det"><td colspan="7"><table><thead><tr><th>الاختبار</th><th>التاريخ</th><th>الدرجة</th><th>النسبة</th><th>صحيحة</th><th>خاطئة</th><th>منها بلا إجابة</th><th>المدة</th><th>الاسم المكتوب</th></tr></thead><tbody>${a.map(x=>`<tr><td>الاختبار ${x.exam}</td><td>${fmt(x.at)}</td><td>${x.correct}/${x.total}</td><td>${pill(x.pct)}</td><td>${x.correct}</td><td>${x.wrong}</td><td>${x.skipped}</td><td>${x.minutes} د</td><td>${esc(x.name)||'—'}</td></tr>`).join('')}</tbody></table></td></tr>`;
+ $('tb').innerHTML=rows.map(r=>{const a=r.a,n=a.length,main=a.filter(x=>!x.retry),nm=main.length,ex=new Set(main.map(x=>x.exam)).size,av=nm?Math.round(main.reduce((s,x)=>s+x.pct,0)/nm):0,best=nm?Math.max(...main.map(x=>x.pct)):0;
+  let h=`<tr class="row ${n?'':'unused'}" data-c="${r.code}"><td class="code">${r.code}</td><td>${esc(r.name)||'—'}</td><td>${ex} / 50</td><td>${n}</td><td>${nm?pill(av):'—'}</td><td>${nm?pill(best):'—'}</td><td>${n?fmt(r.last):'لم يُستخدم'}</td></tr>`;
+  if(open.has(r.code)&&n)h+=`<tr class="det"><td colspan="7"><table><thead><tr><th>الاختبار</th><th>التاريخ</th><th>الدرجة</th><th>النسبة</th><th>صحيحة</th><th>خاطئة</th><th>منها بلا إجابة</th><th>المدة</th><th>الاسم المكتوب</th></tr></thead><tbody>${a.map(x=>`<tr><td>الاختبار ${x.exam}${x.retry?' <span class="pill p-mid">إعادة الأخطاء</span>':''}</td><td>${fmt(x.at)}</td><td>${x.correct}/${x.total}</td><td>${pill(x.pct)}</td><td>${x.correct}</td><td>${x.wrong}</td><td>${x.skipped}</td><td>${x.minutes} د</td><td>${esc(x.name)||'—'}</td></tr>`).join('')}</tbody></table></td></tr>`;
   return h}).join('')}
 $('tb').addEventListener('click',e=>{const tr=e.target.closest('tr.row');if(!tr)return;const c=tr.dataset.c;open.has(c)?open.delete(c):open.add(c);render()});
 $('q').addEventListener('input',render);$('used').addEventListener('change',render);$('rf').onclick=load;
 $('lo').onclick=()=>{try{sessionStorage.removeItem('rk_admin')}catch(e){}location.reload()};
 $('gf').onsubmit=e=>{e.preventDefault();KEY=$('key').value.trim();load()};
 $('csv').onclick=()=>{const head=['رمز الدخول','اسم الطالب','الاختبار','التاريخ','الدرجة','من','النسبة %','صحيحة','خاطئة','منها بلا إجابة','المدة بالدقائق'];
- const lines=[head,...DATA.results.map(x=>[x.code,x.name,x.exam,fmt(x.at),x.correct,x.total,x.pct,x.correct,x.wrong,x.skipped,x.minutes])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','));
+ const lines=[head,...DATA.results.map(x=>[x.code,x.name,x.exam+(x.retry?' (إعادة الأخطاء)':''),fmt(x.at),x.correct,x.total,x.pct,x.correct,x.wrong,x.skipped,x.minutes])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','));
  const b=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='نتائج-الطلاب.csv';a.click()};
 if(KEY)load();
 </script>
