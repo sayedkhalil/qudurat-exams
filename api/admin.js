@@ -1,5 +1,6 @@
 import { list, get } from '@vercel/blob';
-import { validCodes, json } from './_auth.js';
+import { validCodes, json, PACKAGES } from './_auth.js';
+import { readLevels, DEFAULT_LEVEL } from './_levels.js';
 
 export async function GET(request) {
   const key = request.headers.get('x-admin-key') || '';
@@ -26,5 +27,5 @@ export async function GET(request) {
     results.push(...chunk.filter(Boolean));
   }
   results.sort((a, b) => (a.at < b.at ? 1 : -1));
-  return json({ ok: true, codes: validCodes(), results });
+  return json({ ok: true, codes: validCodes(), results, levels: await readLevels(), defaultLevel: DEFAULT_LEVEL(), packages: PACKAGES });
 }

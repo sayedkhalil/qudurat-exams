@@ -1,5 +1,5 @@
 import { next } from '@vercel/functions';
-import { codeFromRequest } from './api/_auth.js';
+import { sessionFromRequest, packageOf } from './api/_auth.js';
 
 // Everything requires a valid student code except the login page, the admin page, APIs and static assets.
 export const config = {
@@ -7,8 +7,15 @@ export const config = {
 };
 
 export default async function middleware(request) {
-  const code = await codeFromRequest(request);
-  if (code) return next();
-  const url = new URL('/login', request.url);
-  return Response.redirect(url, 302);
+  const s = await sessionFromRequest(request);
+  const url = new URL(request.url);
+  if (!s) return Response.redirect(new URL('/login', request.url), 302);
+
+  // Package gate for test pages and question images.
+  const m = url.pathname.match(/^\/(?:exams\/exam-|q\/v)(\d+)/);
+  if (m && packageOf(m[1]) > s.level) {
+    if (url.pathname.startsWith('/q/')) return new Response('Forbidden', { status: 403 });
+    return Response.redirect(new URL(`/?locked=${packageOf(m[1])}`, request.url), 302);
+  }
+  return next();
 }

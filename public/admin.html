@@ -38,6 +38,11 @@ tr.unused td{color:#a7adc2}
 .det table{font-size:13px}.det th{background:#f0eff9}
 .empty{padding:30px;text-align:center;color:var(--muted)}
 .hidden{display:none!important}
+.lv,#blv{font:inherit;font-weight:700;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--brand)}
+.lv.saving{opacity:.5}.lv.saved{border-color:#12b886}
+.bulk{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px;color:var(--muted)}
+.bulk .btn{padding:8px 14px}
+.msg{font-weight:700;color:var(--ok)}
 </style></head><body>
 <div class="gate" id="gate">
  <img src="/assets/logo.png" alt="" style="height:110px">
@@ -49,8 +54,9 @@ tr.unused td{color:#a7adc2}
  <header><img src="/assets/logo.png" alt=""><div><h1>نتائج الطلاب</h1><small style="color:var(--muted)" id="upd"></small></div><span class="sp"></span>
   <button class="btn ghost" id="rf">تحديث ↻</button><button class="btn" id="csv">تصدير Excel (CSV)</button><button class="btn ghost" id="lo">خروج</button></header>
  <div class="kpis" id="kpis"></div>
- <div class="tools"><input id="q" placeholder="ابحث برمز الدخول أو اسم الطالب"><label><input type="checkbox" id="used" checked> الرموز المستخدمة فقط</label></div>
- <div class="tbl"><table><thead><tr><th>رمز الدخول</th><th>اسم الطالب</th><th>اختبارات مختلفة</th><th>محاولات</th><th>متوسط النسبة</th><th>أفضل نسبة</th><th>آخر نشاط</th></tr></thead><tbody id="tb"></tbody></table></div>
+ <div class="tools"><input id="q" placeholder="ابحث برمز الدخول أو اسم الطالب"><label><input type="checkbox" id="used"> الرموز المستخدمة فقط</label></div>
+ <div class="tools bulk"><span>تعيين لكل الرموز الظاهرة في الجدول:</span><select id="blv"></select><button class="btn" id="bap">تطبيق</button><span id="bmsg" class="msg"></span></div>
+ <div class="tbl"><table><thead><tr><th>رمز الدخول</th><th>الحزم المتاحة</th><th>اسم الطالب</th><th>اختبارات مختلفة</th><th>محاولات</th><th>متوسط النسبة</th><th>أفضل نسبة</th><th>آخر نشاط</th></tr></thead><tbody id="tb"></tbody></table></div>
 </div>
 <script>
 const $=id=>document.getElementById(id);let KEY='',DATA=null,open=new Set();
@@ -65,6 +71,13 @@ async function load(){
   try{sessionStorage.setItem('rk_admin',KEY)}catch(e){}
   DATA=d;$('gate').classList.add('hidden');$('app').classList.remove('hidden');$('upd').textContent='آخر تحديث: '+fmt(new Date());render()}
  catch(e){$('ge').textContent='تعذّر الاتصال'} finally{$('rf').textContent='تحديث ↻'}}
+const PK=5;
+const lv=c=>(DATA.levels&&DATA.levels[c])||DATA.defaultLevel||1;
+const lvOpts=v=>Array.from({length:PK},(_,i)=>i+1).map(n=>`<option value="${n}"${n==v?' selected':''}>${n==1?'الحزمة 1 فقط':n==2?'أول حزمتين':n==PK?'كل الحزم ('+PK+')':'أول '+n+' حزم'}</option>`).join('');
+let VISIBLE=[];
+async function setLevel(codes,level){
+ const r=await fetch('/api/levels',{method:'POST',headers:{'content-type':'application/json','x-admin-key':KEY},body:JSON.stringify({codes,level})});
+ const d=await r.json();if(!d.ok)throw new Error(d.error||'تعذّر الحفظ');DATA.levels=d.levels;return d}
 function group(){const m=new Map(DATA.codes.map(c=>[c,[]]));DATA.results.forEach(r=>{if(!m.has(r.code))m.set(r.code,[]);m.get(r.code).push(r)});return m}
 function render(){
  const m=group(),q=$('q').value.trim(),onlyUsed=$('used').checked;
@@ -75,17 +88,24 @@ function render(){
  if(onlyUsed)rows=rows.filter(r=>r.a.length);
  if(q)rows=rows.filter(r=>r.code.includes(q)||r.name.includes(q));
  rows.sort((x,y)=>(y.last>x.last?1:y.last<x.last?-1:x.code.localeCompare(y.code)));
- if(!rows.length){$('tb').innerHTML=`<tr><td colspan="7" class="empty">${DATA.results.length?'لا توجد نتائج مطابقة':'لم يُسجَّل أي اختبار بعد. ستظهر النتائج هنا فور إنهاء أي طالب لاختبار.'}</td></tr>`;return}
+ VISIBLE=rows.map(r=>r.code);
+ if(!rows.length){$('tb').innerHTML=`<tr><td colspan="8" class="empty">${DATA.results.length?'لا توجد نتائج مطابقة':'لم يُسجَّل أي اختبار بعد. ستظهر النتائج هنا فور إنهاء أي طالب لاختبار.'}</td></tr>`;return}
  $('tb').innerHTML=rows.map(r=>{const a=r.a,n=a.length,main=a.filter(x=>!x.retry),nm=main.length,ex=new Set(main.map(x=>x.exam)).size,av=nm?Math.round(main.reduce((s,x)=>s+x.pct,0)/nm):0,best=nm?Math.max(...main.map(x=>x.pct)):0;
-  let h=`<tr class="row ${n?'':'unused'}" data-c="${r.code}"><td class="code">${r.code}</td><td>${esc(r.name)||'—'}</td><td>${ex} / 50</td><td>${n}</td><td>${nm?pill(av):'—'}</td><td>${nm?pill(best):'—'}</td><td>${n?fmt(r.last):'لم يُستخدم'}</td></tr>`;
-  if(open.has(r.code)&&n)h+=`<tr class="det"><td colspan="7"><table><thead><tr><th>الاختبار</th><th>التاريخ</th><th>الدرجة</th><th>النسبة</th><th>صحيحة</th><th>خاطئة</th><th>منها بلا إجابة</th><th>المدة</th><th>الاسم المكتوب</th></tr></thead><tbody>${a.map(x=>`<tr><td>الاختبار ${x.exam}${x.retry?' <span class="pill p-mid">إعادة الأخطاء</span>':''}</td><td>${fmt(x.at)}</td><td>${x.correct}/${x.total}</td><td>${pill(x.pct)}</td><td>${x.correct}</td><td>${x.wrong}</td><td>${x.skipped}</td><td>${x.minutes} د</td><td>${esc(x.name)||'—'}</td></tr>`).join('')}</tbody></table></td></tr>`;
+  let h=`<tr class="row ${n?'':'unused'}" data-c="${r.code}"><td class="code">${r.code}</td><td><select class="lv" data-c="${r.code}">${lvOpts(lv(r.code))}</select></td><td>${esc(r.name)||'—'}</td><td>${ex} / 50</td><td>${n}</td><td>${nm?pill(av):'—'}</td><td>${nm?pill(best):'—'}</td><td>${n?fmt(r.last):'لم يُستخدم'}</td></tr>`;
+  if(open.has(r.code)&&n)h+=`<tr class="det"><td colspan="8"><table><thead><tr><th>الاختبار</th><th>التاريخ</th><th>الدرجة</th><th>النسبة</th><th>صحيحة</th><th>خاطئة</th><th>منها بلا إجابة</th><th>المدة</th><th>الاسم المكتوب</th></tr></thead><tbody>${a.map(x=>`<tr><td>الاختبار ${x.exam}${x.retry?' <span class="pill p-mid">إعادة الأخطاء</span>':''}</td><td>${fmt(x.at)}</td><td>${x.correct}/${x.total}</td><td>${pill(x.pct)}</td><td>${x.correct}</td><td>${x.wrong}</td><td>${x.skipped}</td><td>${x.minutes} د</td><td>${esc(x.name)||'—'}</td></tr>`).join('')}</tbody></table></td></tr>`;
   return h}).join('')}
-$('tb').addEventListener('click',e=>{const tr=e.target.closest('tr.row');if(!tr)return;const c=tr.dataset.c;open.has(c)?open.delete(c):open.add(c);render()});
+$('tb').addEventListener('change',async e=>{const s=e.target.closest('select.lv');if(!s)return;s.classList.add('saving');
+ try{await setLevel([s.dataset.c],+s.value);s.classList.remove('saving');s.classList.add('saved');setTimeout(()=>s.classList.remove('saved'),1200)}catch(x){alertBox(x.message);s.classList.remove('saving')}});
+function alertBox(t){$('bmsg').style.color='var(--bad)';$('bmsg').textContent=t}
+$('blv').innerHTML=lvOpts(1);
+$('bap').onclick=async()=>{if(!VISIBLE.length)return;$('bmsg').style.color='';$('bmsg').textContent='جارٍ الحفظ…';
+ try{const d=await setLevel(VISIBLE,+$('blv').value);$('bmsg').textContent='✔ تم تعيين '+d.updated+' رمزًا';render()}catch(x){alertBox(x.message)}};
+$('tb').addEventListener('click',e=>{if(e.target.closest('select'))return;const tr=e.target.closest('tr.row');if(!tr)return;const c=tr.dataset.c;open.has(c)?open.delete(c):open.add(c);render()});
 $('q').addEventListener('input',render);$('used').addEventListener('change',render);$('rf').onclick=load;
 $('lo').onclick=()=>{try{sessionStorage.removeItem('rk_admin')}catch(e){}location.reload()};
 $('gf').onsubmit=e=>{e.preventDefault();KEY=$('key').value.trim();load()};
-$('csv').onclick=()=>{const head=['رمز الدخول','اسم الطالب','الاختبار','التاريخ','الدرجة','من','النسبة %','صحيحة','خاطئة','منها بلا إجابة','المدة بالدقائق'];
- const lines=[head,...DATA.results.map(x=>[x.code,x.name,x.exam+(x.retry?' (إعادة الأخطاء)':''),fmt(x.at),x.correct,x.total,x.pct,x.correct,x.wrong,x.skipped,x.minutes])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','));
+$('csv').onclick=()=>{const head=['رمز الدخول','الحزم المتاحة','اسم الطالب','الاختبار','التاريخ','الدرجة','من','النسبة %','صحيحة','خاطئة','منها بلا إجابة','المدة بالدقائق'];
+ const lines=[head,...DATA.results.map(x=>[x.code,lv(x.code),x.name,x.exam+(x.retry?' (إعادة الأخطاء)':''),fmt(x.at),x.correct,x.total,x.pct,x.correct,x.wrong,x.skipped,x.minutes])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','));
  const b=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='نتائج-الطلاب.csv';a.click()};
 if(KEY)load();
 </script>

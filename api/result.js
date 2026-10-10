@@ -1,17 +1,20 @@
 import { put } from '@vercel/blob';
-import { codeFromRequest, json } from './_auth.js';
+import { sessionFromRequest, packageOf, json } from './_auth.js';
+import { levelFor } from './_levels.js';
 import KEY from './_key.js';
 
 const num = (v, max = 100000) => Math.max(0, Math.min(max, Math.round(Number(v) || 0)));
 
 export async function POST(request) {
-  const code = await codeFromRequest(request);
-  if (!code) return json({ ok: false, error: 'انتهت الجلسة، سجّل الدخول من جديد' }, 401);
+  const s = await sessionFromRequest(request);
+  if (!s) return json({ ok: false, error: 'انتهت الجلسة، سجّل الدخول من جديد' }, 401);
+  const code = s.code;
   let b = {};
   try { b = await request.json(); } catch {}
   const exam = num(b.exam, 999);
   const key = KEY[exam];
   if (!key) return json({ ok: false, error: 'رقم الاختبار غير صحيح' }, 400);
+  if (packageOf(exam) > await levelFor(code)) return json({ ok: false, error: 'هذا الاختبار غير متاح لرمز الدخول الخاص بك' }, 403);
 
   // Optional subset of question indices (retry of wrong answers only).
   let questions = key.map((_, i) => i);

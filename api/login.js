@@ -1,4 +1,5 @@
 import { validCodes, makeCookie, json } from './_auth.js';
+import { levelFor } from './_levels.js';
 
 export async function POST(request) {
   let body = {};
@@ -7,5 +8,6 @@ export async function POST(request) {
   if (!code || !validCodes().includes(code)) {
     return json({ ok: false, error: 'رمز الدخول غير صحيح' }, 401);
   }
-  return json({ ok: true, code }, 200, { 'set-cookie': await makeCookie(code) });
+  const level = await levelFor(code);
+  return json({ ok: true, code, level }, 200, { 'set-cookie': await makeCookie(code, level) });
 }

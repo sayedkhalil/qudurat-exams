@@ -1,5 +1,7 @@
-// Shared helpers: signed session cookie for student access codes.
+// Shared helpers: signed session cookie "code.level.sig" for student access codes.
 const enc = new TextEncoder();
+export const PACKAGES = 5;          // 50 tests -> 5 packages of 10
+export const PACK_SIZE = 10;
 
 async function hmac(text) {
   const key = await crypto.subtle.importKey(
@@ -13,23 +15,31 @@ export function validCodes() {
   return (process.env.ACCESS_CODES || '').split(/[\s,]+/).filter(Boolean);
 }
 
-export async function makeCookie(code) {
-  const v = `${code}.${await hmac(code)}`;
-  return `sc=${v}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 120}`;
+export function clampLevel(v) {
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) ? Math.max(1, Math.min(PACKAGES, n)) : 1;
+}
+
+export const packageOf = (exam) => Math.ceil(Number(exam) / PACK_SIZE);
+
+export async function makeCookie(code, level) {
+  const body = `${code}.${clampLevel(level)}`;
+  return `sc=${body}.${await hmac(body)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 120}`;
 }
 
 export function clearCookie() {
   return 'sc=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0';
 }
 
-export async function codeFromRequest(request) {
+// Returns { code, level } from a valid cookie, or null.
+export async function sessionFromRequest(request) {
   const raw = request.headers.get('cookie') || '';
-  const m = raw.match(/(?:^|;\s*)sc=([0-9]+)\.([0-9a-f]{64})/);
+  const m = raw.match(/(?:^|;\s*)sc=([0-9]+)\.([0-9]+)\.([0-9a-f]{64})/);
   if (!m) return null;
-  const [, code, sig] = m;
-  if (sig !== await hmac(code)) return null;
+  const [, code, level, sig] = m;
+  if (sig !== await hmac(`${code}.${level}`)) return null;
   if (!validCodes().includes(code)) return null;
-  return code;
+  return { code, level: clampLevel(level) };
 }
 
 export function json(data, status = 200, headers = {}) {
