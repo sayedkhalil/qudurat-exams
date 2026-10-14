@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>دخول – خالد رخا للقدرات الكمي</title>
+<title>دخول – اختبارات القدرات – مدارس الحياة الأهلية</title>
 <link rel="icon" href="/assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
@@ -10,7 +10,7 @@
 html,body{margin:0;min-height:100%;background:#f6f5fc;color:var(--ink);font-family:"Almarai","Segoe UI",Tahoma,Arial,sans-serif}
 body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
 .box{width:100%;max-width:400px;background:#fff;border:1.5px solid var(--line);border-radius:24px;padding:28px 22px;text-align:center;box-shadow:0 14px 40px rgba(59,50,137,.10)}
-.box img{height:150px;width:auto}
+.box img{height:86px;width:auto;max-width:100%}
 h1{margin:12px 0 6px;font-size:22px;font-weight:800;color:var(--brand)}
 p{margin:0 0 20px;color:var(--muted);font-size:14px;line-height:1.8}
 input{width:100%;padding:14px;border:2px solid var(--line);border-radius:14px;font:inherit;font-size:24px;font-weight:800;letter-spacing:6px;text-align:center;direction:ltr;outline:none;color:var(--ink)}
@@ -22,13 +22,13 @@ button:disabled{opacity:.6;cursor:wait}
 .credit b{color:var(--brand)}.credit a{color:#0b8f66;font-weight:800;text-decoration:none;direction:ltr;unicode-bidi:embed}
 </style></head><body>
 <form class="box" id="f">
- <img src="/assets/logo.png" alt="خالد رخا للقدرات الكمي">
+ <img src="/assets/logo.png" alt="مدارس الحياة الأهلية">
  <h1>اختبارات القدرات – القسم الكمي</h1>
  <p>اكتب رمز الدخول الخاص بك للوصول إلى الاختبارات.<br>تُحفظ نتائجك تلقائيًا على هذا الرمز.</p>
  <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" required>
  <button id="b" type="submit">دخول</button>
  <div class="err" id="e"></div>
- <div class="credit">ليس لديك رمز؟ تواصل مع <b>أ / خالد رخا</b><br>واتساب <a href="https://wa.me/966533434872" target="_blank">0533434872</a></div>
+ <div class="credit">ليس لديك رمز دخول؟ تواصل مع إدارة <b>مدارس الحياة الأهلية</b></div>
 </form>
 <script>
 const f=document.getElementById('f'),c=document.getElementById('code'),b=document.getElementById('b'),e=document.getElementById('e');

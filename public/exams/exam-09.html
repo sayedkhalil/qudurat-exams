@@ -11,8 +11,9 @@ html,body{margin:0;background:#fff;color:var(--ink);font-family:"Almarai","Segoe
 body{min-height:100vh;display:flex;flex-direction:column;align-items:center}
 .wrap{width:100%;max-width:860px;padding:14px 14px 90px}
 .logos{position:relative;display:flex;justify-content:center;padding:6px 0 12px}
-.logos img{height:clamp(110px,22vw,150px);width:auto;display:block}
-.logos .home{position:absolute;top:8px;left:0;font-size:13px;font-weight:700;color:#3b3289;text-decoration:none;background:#efedfb;padding:7px 12px;border-radius:12px}
+.logos img{height:clamp(64px,14vw,90px);width:auto;display:block}
+.logos{justify-content:space-between!important;align-items:center;gap:10px}
+.logos .home{position:static;order:2;white-space:nowrap;font-size:13px;font-weight:700;color:#3b3289;text-decoration:none;background:#efedfb;padding:7px 12px;border-radius:12px}
 button,input{font-family:inherit}
 .card{background:#fff;border:1.5px solid var(--line);border-radius:22px;box-shadow:0 8px 28px rgba(108,92,231,.10)}
 .hero{overflow:hidden;text-align:center}
@@ -85,7 +86,7 @@ button,input{font-family:inherit}
 .btn.retry{background:linear-gradient(120deg,#f03e5e,#ff9f1c)}
 </style></head><body>
 <div class="wrap">
- <div class="logos"><a href="/" class="home">⬅ جميع الاختبارات</a><img src="/assets/logo.png" alt="خالد رخا للقدرات الكمي"></div>
+ <div class="logos"><a href="/" class="home">⬅ جميع الاختبارات</a><img src="/assets/logo.png" alt="مدارس الحياة الأهلية"></div>
 
  <section id="home" class="card hero">
   <div class="band"><h1>اختبار القدرات العامة – القسم الكمي</h1><p>الاختبار رقم 9 &nbsp;|&nbsp; 48 سؤالًا</p></div>
@@ -106,7 +107,7 @@ button,input{font-family:inherit}
 
  <section id="result" class="card res hidden"></section>
 </div>
-<div class="foot">إعداد <b>أ / خالد رخا</b> &nbsp;•&nbsp; للتواصل واتساب <a href="https://wa.me/966533434872" target="_blank" dir="ltr" style="color:inherit;text-decoration:none">0533434872</a></div>
+<div class="foot"><b>مدارس الحياة الأهلية</b> &nbsp;•&nbsp; اختبارات القدرات العامة – القسم الكمي</div>
 
 <script>
 const EXAM=9,COUNT=48,T=60,L=['أ','ب','ج','د'];
